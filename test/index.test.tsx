@@ -1,6 +1,5 @@
-
 describe('Thing', () => {
   it('renders without crashing', () => {
-    expect(1).toBe(1)
+    expect(1).toBe(1);
   });
 });
