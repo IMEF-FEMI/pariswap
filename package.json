@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "license": "MIT",
   "author": "bolajifemi28@gmail.com",
+  "repository": "https://github.com/IMEF-FEMI/Pariswap",
+  "private": false,
   "main": "dist/index.js",
   "module": "dist/pariswap.esm.js",
   "typings": "dist/index.d.ts",
@@ -17,7 +19,9 @@
     "prepare": "dts build",
     "size": "size-limit",
     "start": "dts watch",
-    "test": "dts test --passWithNoTests"
+    "test": "dts test --passWithNoTests",
+    "ci": "pnpm run lint && pnpm run test && pnpm run build",
+    "release": "pnpm run lint && pnpm run test && pnpm run build && changeset publish"
   },
   "husky": {
     "hooks": {
@@ -48,5 +52,20 @@
       "path": "dist/pariswap.esm.js",
       "limit": "10 KB"
     }
-  ]
+  ],
+  "devDependencies": {
+    "@changesets/cli": "^2.26.1",
+    "@size-limit/preset-small-lib": "^8.2.4",
+    "@tsconfig/recommended": "^1.0.2",
+    "@tsconfig/vite-react": "^2.0.0",
+    "@types/react": "^18.2.12",
+    "@types/react-dom": "^18.2.5",
+    "dts-cli": "^2.0.3",
+    "husky": "^8.0.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "size-limit": "^8.2.4",
+    "tslib": "^2.5.3",
+    "typescript": "^5.1.3"
+  }
 }
