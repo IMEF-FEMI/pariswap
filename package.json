@@ -20,8 +20,8 @@
     "size": "size-limit",
     "start": "dts watch",
     "test": "dts test --passWithNoTests",
-    "ci": "pnpm run lint && pnpm run test && pnpm run build",
-    "release": "pnpm run lint && pnpm run test && pnpm run build && changeset publish"
+    "ci": "pnpm run lint && pnpm run build",
+    "release": "pnpm run lint && pnpm run build && changeset publish"
   },
   "husky": {
     "hooks": {

@@ -46,6 +46,7 @@ describe('Pariswap functions', () => {
     const market = MarketPairEnum.BTCUSD;
     const side = PositionSideEnum.LONG;
 
+
     const connection = new Connection(rpc, 'confirmed');
     const parimutuelWeb3 = new ParimutuelWeb3(config, connection);
     const markets = getMarketPubkeys(config, market);
