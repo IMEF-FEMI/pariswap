@@ -3,3 +3,4 @@ src
 .github
 pnpm-lock.yaml
 tsconfig.json
+yarn.lock
