@@ -70,7 +70,7 @@ export const JupiterApiProvider: FC<{ children: ReactNode }> = ({
         (token) => getIndexInUSDCSwappableOutput(token.address) != -1
       );
       setSwappableTokenList(tokenList);
-      console.log(tokenList);
+      // console.log(tokenList);
 
     })();
   }, []);

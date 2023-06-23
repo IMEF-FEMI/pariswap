@@ -1,0 +1,548 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Urbanist:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+
+.App {
+  text-align: center;
+  background: linear-gradient(45deg, #19232D, #19232D);
+  animation: gradientAnimation 5s linear infinite;
+  min-height: 100vh;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+p {
+  margin: 0;
+}
+
+.App-content {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 500px;
+  margin: 0 auto;
+  color: white;
+  padding: 20px 0;
+}
+
+.inputContainer {
+  width: 100%;
+  margin-bottom: 30px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: black;
+}
+
+.inputValue{
+  padding: 20px;
+  width: 100%;
+  background: black;
+  border: none;
+  color: white;
+  outline: none;
+}
+
+
+.paymentButton{
+  padding: 20px;
+  font-size: 16px;
+  width: 100%;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-weight: bold;
+  background: linear-gradient( 90deg, red, #19232D, #61dafb); 
+  transition: 0.5s ease-in-out;
+}
+
+
+
+.modalContainer{
+  position: fixed;
+  min-height: 80vh;
+  width: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0,0,0,0.1);
+}
+
+
+.poweredContainer{
+  font-family: 'Urbanist', sans-serif;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+
+
+.modalContent{
+  border-radius: 20px;
+  width: 400px;
+  background: #304256;
+  animation: gradientAnimation 5s linear infinite;
+  color: white;
+  padding: 20px;
+}
+
+
+@media (max-width: 600px) {
+  .paymentButton, .inputContainer {
+    width: 80%;
+    margin: 15px auto;
+  }
+
+  .modalContent {
+    width: 89%;
+    margin: 0 auto;
+    padding: 10px;
+    border-radius: 10px;
+  }
+}
+
+
+
+
+.title {
+  font-size: 24px;
+  text-align: center;
+  margin: 0;
+}
+
+.cancelBtn{
+  display: flex;
+  justify-content: flex-end;
+ 
+}
+
+.cancelBtn > p {
+  font-size: 12px;
+  cursor: pointer;
+  color: white;
+  background: #19232D;
+  padding: 10px 20px;
+  border-radius: 10px;
+  transition: all 0.5s;
+}
+
+.cancelBtn > p:hover {
+  background-color: black;
+}
+
+
+
+
+
+
+.betValue{
+  font-size: 16px;
+  text-align: center;
+  margin: 20px 0;
+  font-family: 'Urbanist', sans-serif;
+}
+
+.betValue > span {
+  font-weight: bold;
+}
+
+.timer {
+  margin-bottom: 30px;
+  font-family: 'Urbanist', sans-serif;
+  font-weight: bold;
+}
+
+.timerTitle{
+  margin-bottom: 20px;
+}
+
+.timer > p > span {
+  background: linear-gradient(45deg, #ff0000, #ff8800);
+  padding: 10px;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+}
+
+
+.paymentBreakdown {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  background: #202734;
+  padding: 15px 20px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.paymentBreakdown > p {
+  font-family: 'Urbanist', sans-serif;
+}
+
+.toggleButton {
+  color: white;
+  border: none;
+  background-color: transparent;
+  font-size: 30px;
+  outline: none;
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out;
+}
+
+
+
+.accordionContent {
+  padding: 10px;
+  background: transparent;
+  border-radius: 0px 0px 4px 4px;
+  animation: slideDown 0.2s ease-in-out;
+  display: flex;
+  border-bottom: 2px solid #19232D;
+  border-right: 2px solid #19232D;
+  border-left: 1px solid #19232D;
+  flex-direction: column;
+  align-items: flex-start;
+  color: white;
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 600;
+}
+
+.accordionContent > p {
+  margin-bottom: 20px;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+
+
+
+
+.loader {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ffffff;
+  border-top: 2px solid #000000;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.currencyContainer{
+  margin-top: 10px;
+  position: relative;
+  width: 100%;
+}
+
+.balanceContainer{
+  display: flex;
+  justify-content: space-between;
+  background: #19232D;
+  padding: 10px 10px;
+  border-radius: 10px;
+}
+
+.balance {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.balanceTitle{
+  font-family: 'Urbanist', sans-serif;
+  font-family: bold;
+  font-size: 12px;
+}
+
+.currencyBtn {
+  padding: 10px 15px; 
+  background: #304256;
+  position: relative;
+  border: none;
+  color: white;
+  font-size: 16px;
+  border-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+  transition: 0.5s;
+  position: relative;
+  z-index: 3;
+  border: 1px solid transparent;
+}
+
+.currencyBtn:hover {
+  border: 1px solid green;
+}
+
+.coinBtnName {
+  font-weight: bold;
+  font-size: 12px;
+}
+
+
+
+.icon {
+  font-size: 20px;
+}
+
+.arrowDropDown {
+  width: 5px;
+  height: 5px;
+  margin: 10px 0;
+  border: 2px solid white;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+  transition: transform 0.3s;
+}
+
+.arrowDropDown.open {
+  transform: rotate(225deg);
+}
+
+.currencyModal{
+  background: transparent;
+  color: white;
+  border-radius: 10px;
+  margin-top: -70px;
+  position: relative;
+  z-index: 5;
+  box-shadow: 0px 2px 2px  #19232D;
+  overflow: hidden;
+  animation: slideDown 0.2s ease-in-out;
+}
+
+
+.searchContainer {
+  width: 100%;
+  overflow: hidden;
+  background: #19232D;
+  border-radius: 5px;
+  display: flex;
+  border: 2px solid #19232D;
+}
+
+.closeInput {
+  padding: 0px 20px;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: #19232D;
+  color: white;
+  transition: 0.5s;
+}
+
+.closeInput:hover {
+  background: black;
+}
+
+.searchContainer > input {
+  outline: none;
+  padding: 0px 20px;
+  height: 30px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 16px;
+}
+
+
+.coinContainer{
+  overflow: hidden;
+  overflow-y: scroll;
+  border: 2px solid #19232D;
+  background: #304256;
+  height: 300px;
+
+}
+
+
+
+.imageContainer{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50px;
+  overflow: hidden;
+}
+
+.imageContainer > img{
+  width: 100%;
+  height: 100%;
+}
+
+
+.coinContent {
+  background: transparent;
+  display: flex;
+  gap: 20px;
+  margin: 5px 0;
+  padding: 5px 20px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  cursor: pointer;  
+  color: white;
+  transition: 0.2s ease;
+}
+
+.coinContent:hover {
+  background: #A5C4F9;
+  color: black;
+}
+
+.rightCoin {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-start;
+}
+
+.topContent {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.symbol {
+  font-weight: bold;
+}
+
+.coinName {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.searchContainer input {
+  width: 100%;
+  padding: 10px;
+}
+
+
+/* Webkit-based browsers */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #004BC4;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: black;
+  border-radius: 4px;
+}
+
+/* Firefox */
+.scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #888 black;
+}
+
+
+.proceedBtn{
+  background: #19232D;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: none;
+  margin: 20px 0;
+  padding: 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-family: "Urbanist";
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: 0.5s;
+  font-weight: bold;
+}
+
+.proceedBtn:hover{
+  border: 1px solid green;
+}

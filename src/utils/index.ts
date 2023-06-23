@@ -38,6 +38,8 @@ export async function fetchSwappableTokenList(): Promise<TokenData[]> {
   const response = await fetch('https://token.jup.ag/strict');
   const tokenList: TokenData[] = (await response.json()) as Array<any>;
 
+  console.log('tokenList 1: ', tokenList);
+
   // Retrieve indexed routed map
   const indexedRouteMapResponse = await fetch(
     'https://quote-api.jup.ag/v4/indexed-route-map'

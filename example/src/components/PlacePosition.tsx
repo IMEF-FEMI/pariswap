@@ -11,6 +11,7 @@ import { PariConfig } from './Config';
 import PaymentDialog from './PaymentDialog';
 import { getBalance } from '@/utils/helpers';
 import { useNetworkConfiguration } from '@/contexts/NetworkConfigurationProvider';
+import { usePariswapApi } from 'pariswap';
 
 const PlacePosition: FC<{
   pariPubkey: string;
@@ -21,6 +22,7 @@ const PlacePosition: FC<{
   const [showModal, setShowModal] = useState(false);
   const { networkConfiguration } = useNetworkConfiguration();
   const wallet = useWallet();
+  const ddd = usePariswapApi();
 
   let rpc = 'https://api.devnet.solana.com';
 
@@ -68,17 +70,19 @@ const PlacePosition: FC<{
             new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v')
           );
 
-          if (balanceOfUSDC >= Number(amount)) {
-            await parimutuelWeb3.placePosition(
-              wallet as WalletSigner,
-              new PublicKey(pariPubkey),
-              parseFloat(amount) * (10 ** 6 / 1),
-              side,
-              Date.now()
-            );
-          } else {
-            setShowModal(true);
-          }
+          // if (balanceOfUSDC >= Number(amount)) {
+          //   await parimutuelWeb3.placePosition(
+          //     wallet as WalletSigner,
+          //     new PublicKey(pariPubkey),
+          //     parseFloat(amount) * (10 ** 6 / 1),
+          //     side,
+          //     Date.now()
+          //   );
+          // } else {
+          //   setShowModal(true);
+          // }
+
+          console.log(ddd);
         }}
         disabled={amount === '0'}
       >

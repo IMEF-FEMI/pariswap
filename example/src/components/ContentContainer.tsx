@@ -15,7 +15,7 @@ export const ContentContainer: FC = (props:any) => {
       {/* SideBar / Drawer */}
       <div className="drawer-side">
         <label htmlFor="my-drawer" className="drawer-overlay"></label>
-        <ul className="p-4 overflow-y-auto menu w-80 bg-base-100">
+        <ul className="p-4 overflow-y-auto menu w-80 bg-base-100"> 
           <li>
             <h1>Menu</h1>
           </li>

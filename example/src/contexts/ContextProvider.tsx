@@ -23,18 +23,18 @@ import {
 import dynamic from 'next/dynamic';
 import { JupiterApiProvider } from './JupiterApiContext';
 
-import { PariswapProvider } from 'pariswap'; 
+import { PariswapProvider } from 'pariswap';
 
-const ReactUIWalletModalProviderDynamic = dynamic( 
+const ReactUIWalletModalProviderDynamic = dynamic(
   async () =>
     (await import('@solana/wallet-adapter-react-ui')).WalletModalProvider,
-  { ssr: false } 
+  { ssr: false }
 );
 
 const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const { autoConnect } = useAutoConnect();
   const { networkConfiguration } = useNetworkConfiguration();
-  const network = networkConfiguration as WalletAdapterNetwork; 
+  const network = networkConfiguration as WalletAdapterNetwork;
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
   console.log(network);
@@ -72,7 +72,7 @@ const WalletContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
           {children}
         </ReactUIWalletModalProviderDynamic>
       </WalletProvider>
-    </ConnectionProvider> 
+    </ConnectionProvider>
   );
 };
 
@@ -82,9 +82,9 @@ export const ContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
       <NetworkConfigurationProvider>
         <AutoConnectProvider>
           <WalletContextProvider>
-            <JupiterApiProvider>
-              <PariswapProvider>{children}</PariswapProvider>
-            </JupiterApiProvider>
+            <PariswapProvider>
+              <JupiterApiProvider>{children}</JupiterApiProvider>
+            </PariswapProvider>
           </WalletContextProvider>
         </AutoConnectProvider>
       </NetworkConfigurationProvider>

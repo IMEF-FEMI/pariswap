@@ -3,8 +3,10 @@
   "extends": "@tsconfig/vite-react/tsconfig.json",
   "include": ["src", "types"],
   "compilerOptions": {
-      "module": "esnext",
-      "lib": ["dom", "esnext"],
+      "allowSyntheticDefaultImports": true,
+      "module": "es6",
+      "lib": ["dom", "esnext", "es5", "es2015", "es2016"],
+      "target": "ES6",
       "importHelpers": true,
       // output .d.ts declaration files for consumers
       "declaration": true,

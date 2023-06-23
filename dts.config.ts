@@ -1,4 +1,5 @@
 import external from 'rollup-plugin-peer-deps-external';
+import css from "rollup-plugin-import-css";
 
 // Not transpiled with TypeScript or Babel, so use plain Es6/Node.js!
 /**
@@ -8,12 +9,9 @@ module.exports = {
     // This function will run for each entry/format/env combination
     rollup(config, options) {
         config.plugins.push(
-            external()
+            external(),
+            css()
         );
-        // // config.external.push("react", "react-dom")
-        // console.log("-------------------------Config-------------------------------");
-        // console.log(config);
-        
       return config; // always return a config.
     },
   };
