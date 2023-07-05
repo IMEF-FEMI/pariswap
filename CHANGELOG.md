@@ -1,5 +1,12 @@
 # pariswap
 
+## 1.0.1
+
+### Patch Changes
+
+- 71ee3a3: doc \*\*image
+- 6125dd0: updated documentation
+
 ## 1.0.0
 
 ### Major Changes
