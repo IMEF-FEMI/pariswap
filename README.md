@@ -1,160 +1,171 @@
-# DTS React User Guide
+## Pariswap Documentation
 
-Congrats! You just saved yourself hours of work by bootstrapping this project with DTS. Let’s get you oriented with what’s here and how to use it.
+Welcome to the Pariswap documentation! This guide will provide you with all the information you need to integrate Pariswap, a dev tool built on top of the Hxro Parimutuel Protocol, into your application. Pariswap allows users to place bets or positions using any SPL token they hold.
 
-> This DTS setup is meant for developing React component libraries (not apps!) that can be published to NPM. If you’re looking to build a React-based app, you should use `create-react-app`, `razzle`, `nextjs`, `gatsby`, or `react-static`.
+### Table of Contents
+1. Introduction
+2. Getting Started
+   - Installation
+   - Usage Requirements
+3. API Reference
+   - `getPlacePositionTransaction`
+   - `fetchSwappableTokenList`
+4. React Hook Component
+   - `PariswapProvider`
+5. Additional Resources
+   - Support
+   - Examples
 
-> If you’re new to TypeScript and React, checkout [this handy cheatsheet](https://github.com/sw-yx/react-typescript-cheatsheet/)
+---
 
-## Commands
+### 1. Introduction
+Pariswap is a development tool that extends the functionality of the Hxro Parimutuel Protocol. It enables developers to build applications that allow users to participate in peer-to-peer, floating strike options with a pool-based, parimutuel payoff. This means that users can deposit funds into pools representing different outcomes and receive a pro-rata distribution of the total funds in the winning pool.
 
-DTS scaffolds your new library inside `/src`, and also sets up a [Vite-based](https://vitejs.dev) playground for it inside `/example`.
+Pariswap is built on the Solana blockchain and can be accessed using the `@hxronetwork/parimutuelsdk` library. It provides a set of functions and a React hook component to simplify the integration process.
 
-The recommended workflow is to run DTS in one terminal:
+### 2. Getting Started
+
+#### Installation
+To get started with Pariswap, you need to install the required dependencies:
 
 ```bash
-npm start # or yarn start
+npm install @hxronetwork/parimutuelsdk
 ```
 
-This builds to `/dist` and runs the project in watch mode so any edits you save inside `src` causes a rebuild to `/dist`.
+#### Usage Requirements
+Before using Pariswap, ensure you have the following prerequisites:
+- Knowledge of Solana blockchain and smart contract development.
+- A Solana wallet and connection to a Solana network.
+- Basic understanding of the Hxro Parimutuel Protocol.
 
-Then run the example inside another:
+### 3. API Reference
+This section provides an overview of the available functions in the Pariswap API.
 
-```bash
-cd example
-npm i # or yarn to install dependencies
-npm start # or yarn start
+#### `getPlacePositionTransaction`
+This function retrieves a versioned transaction for placing a position in a parimutuel market.
+
+```typescript
+async function getPlacePositionTransaction(
+  connection: Connection,
+  wallet: WalletSigner | Keypair,
+  inputTokenAddress: string,
+  amount: number,
+  parimutuelMarket: string,
+  side: PositionSideEnum,
+  devUsdcATA?: string,
+  devFeeBps: number = 0,
+): Promise<VersionedTransaction>
 ```
 
-The default example imports and live reloads whatever is in `/dist`, so if you are seeing an out of date component, make sure DTS is running in watch mode like we recommend above. 
+- `connection`: The connection object for interacting with the Solana blockchain.
+- `wallet`: The wallet used for signing the transaction.
+- `inputTokenAddress`: The mint address of the token the user wants to use.
+- `amount`: The amount in USD to be placed for the bet.
+- `parimutuelMarket`: The parimutuel market where the position will be placed.
+- `side`: The side of the position (e.g., `PositionSideEnum.LONG` or `PositionSideEnum.SHORT`).
+- `devUsdcATA` (optional): An optional dev USDC ATA address (should be already initialized).
+- `devFeeBps` (optional): Optional developer fee basis points (e.g., 50 for 0.5%, 100 for 1%, 10000 for 100%).
 
-To do a one-off build, use `npm run build` or `yarn build`.
+Returns a promise that resolves to the versioned transaction.
 
-To run tests, use `npm test` or `yarn test`.
+#### `fetchSwappableTokenList`
+This function fetches a list of tokens swappable with USDC. It returns only validated tokens, excluding unknown and banned tokens.
 
-## Configuration
-
-Code quality is set up for you with `prettier`, `husky`, and `lint-staged`. Adjust the respective fields in `package.json` accordingly.
-
-### Jest
-
-Jest tests are set up to run with `npm test` or `yarn test`.
-
-### Bundle analysis
-
-Calculates the real cost of your library using [size-limit](https://github.com/ai/size-limit) with `npm run size` and visulize it with `npm run analyze`.
-
-#### Setup Files
-
-This is the folder structure we set up for you:
-
-```txt
-/example
-  index.html
-  index.tsx       # test your component here in a demo app
-  package.json
-  tsconfig.json
-/src
-  index.tsx       # EDIT THIS
-/test
-  index.test.tsx  # EDIT THIS
-.gitignore
-package.json
-README.md         # EDIT THIS
-tsconfig.json
+```typescript
+async function fetchSwappableTokenList(): Promise<TokenData[]>
 ```
 
-#### React Testing Library
+Returns a promise that resolves to an array of `TokenData` objects representing the swappable tokens.
 
-We do not set up `react-testing-library` for you yet, we welcome contributions and documentation on this.
+### 4. React Hook Component
+Pariswap provides a
 
-### Rollup
+ React hook component, `PariswapProvider`, that simplifies the integration process by handling the necessary context and state management.
 
-DTS uses [Rollup](https://rollupjs.org) as a bundler and generates multiple rollup configs for various module formats and build settings. See [Optimizations](#optimizations) for details.
+#### `PariswapProvider`
+The `PariswapProvider` component wraps your main React component and provides the necessary context for using Pariswap.
 
-### TypeScript
+```typescript
+import { PariswapProvider } from 'pariswap';
 
-`tsconfig.json` is set up to interpret `dom` and `esnext` types, as well as `react` for `jsx`. Adjust according to your needs.
-
-## Continuous Integration
-
-### GitHub Actions
-
-Two actions are added by default:
-
-- `main` which installs deps w/ cache, lints, tests, and builds on all pushes against a Node and OS matrix
-- `size` which comments cost comparison of your library on every pull request using [`size-limit`](https://github.com/ai/size-limit)
-
-## Optimizations
-
-Please see the main `dts` [optimizations docs](https://github.com/weiran-zsd/dts-cli#optimizations). In particular, know that you can take advantage of development-only optimizations:
-
-```js
-// ./types/index.d.ts
-declare var __DEV__: boolean;
-
-// inside your code...
-if (__DEV__) {
-  console.log('foo');
+function App() {
+  return (
+    <PariswapProvider>
+      <YourContainerComponentOrMainContainer />
+    </PariswapProvider>
+  );
 }
+
+export default App;
 ```
 
-You can also choose to install and use [invariant](https://github.com/weiran-zsd/dts-cli#invariant) and [warning](https://github.com/weiran-zsd/dts-cli#warning) functions.
+Ensure that the `PariswapProvider` component is placed at the root level of your application.
 
-## Module Formats
+#### Usage Example
+To use the Pariswap React hook component, follow these steps:
 
-CJS, ESModules, and UMD module formats are supported.
-
-The appropriate paths are configured in `package.json` and `dist/index.js` accordingly. Please report if any issues are found.
-
-## Deploying the Example Playground
-
-The Playground is just a simple [Vite](https://vitejs.dev) app, you can deploy it anywhere you would normally deploy that. Here are some guidelines for **manually** deploying with the Netlify CLI (`npm i -g netlify-cli`):
-
-```bash
-cd example # if not already in the example folder
-npm run build # builds to dist
-netlify deploy # deploy the dist folder
+1. Import the required dependencies:
+```typescript
+import { USDC_MINT, usePariswapApi } from 'pariswap';
+import { getAssociatedTokenAddress } from '@solana/spl-token';
+import { useWallet } from '@solana/wallet-adapter-react';
 ```
 
-Alternatively, if you already have a git repo connected, you can set up continuous deployment with Netlify:
-
-```bash
-netlify init
-# build command: yarn build && cd example && yarn && yarn build
-# directory to deploy: example/dist
-# pick yes for netlify.toml
+2. Initialize the necessary variables and contexts:
+```typescript
+const wallet = useWallet();
+const rpc = process.env.NEXT_PUBLIC_RPC_URL;
+const connection = new Connection(rpc, {
+  commitment: 'confirmed',
+});
+const devAcct = 'your_dev_wallet';
 ```
 
-## Named Exports
-
-Per Palmer Group guidelines, [always use named exports.](https://github.com/palmerhq/typescript#exports) Code split inside your React app instead of your React library.
-
-## Including Styles
-
-There are many ways to ship styles, including with CSS-in-JS. DTS has no opinion on this, configure how you like.
-
-For vanilla CSS, you can include it at the root directory and add it to the `files` section in your `package.json`, so that it can be imported separately by your users and run through their bundler's loader.
-
-## Publishing to NPM
-
-We recommend using [np](https://github.com/sindresorhus/np).
-
-## Usage with Lerna
-
-When creating a new package with DTS within a project set up with Lerna, you might encounter a `Cannot resolve dependency` error when trying to run the `example` project. To fix that you will need to make changes to the `package.json` file _inside the `example` directory_.
-
-The problem is that due to the nature of how dependencies are installed in Lerna projects, the aliases in the example project's `package.json` might not point to the right place, as those dependencies might have been installed in the root of your Lerna project.
-
-Change the `alias` to point to where those packages are actually installed. This depends on the directory structure of your Lerna project, so the actual path might be different from the diff below.
-
-```diff
-   "alias": {
--    "react": "../node_modules/react",
--    "react-dom": "../node_modules/react-dom"
-+    "react": "../../../node_modules/react",
-+    "react-dom": "../../../node_modules/react-dom"
-   },
+3. Obtain the dev USDC associated token address:
+```typescript
+const devUSDCATA = await getAssociatedTokenAddress(
+  new PublicKey(USDC_MINT),
+  new PublicKey(devAcct)
+);
 ```
 
-An alternative to fixing this problem would be to remove aliases altogether and define the dependencies referenced as aliases as dev dependencies instead. [However, that might cause other problems.](https://github.com/formium/tsdx/issues/64)
+4. Place a bet using the `placeBet` function from the `usePariswapApi` hook:
+```typescript
+placeBet(
+  connection,
+  wallet,
+  Number(amount),
+  parimutuelMarket,
+  PositionSideEnum.LONG,
+  devUSDCATA.toBase58(),
+  50 // 0.5% developer fee
+).then((txId) => {
+  if (txId) {
+    console.log(`https://explorer.solana.com/tx/${txId}`);
+    notify({
+      type: 'success',
+      message: `Placed ${
+        side === PositionSideEnum.LONG ? 'LONG' : 'SHORT'
+      } Position`,
+      txid: txId,
+    });
+  }
+});
+```
+---
+
+![PlaceBet Popup](./images/sc.png)
+### 5. Additional Resources
+
+#### Support
+If you have any questions or need assistance with Pariswap, feel free to reach out to me on [Twitter](https://www.twitter.com/femi_0x)
+
+#### Examples
+To explore more examples and usage scenarios, please refer to the [Pariswap Examples repository](https://github.com/IMEF-FEMI/pariswap/tree/main/example).
+
+#### Note: Swap Fee
+Please note that Pariswap charges a 0.5% swap fee on all swap transactions. This fee is automatically deducted from the transaction amount.
+
+
+
+That's it! You should now have a good understanding of how to integrate Pariswap into your application. Happy coding!

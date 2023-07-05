@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { TokenData } from '../../utils';
+import { TokenData } from '../../types';
+import styles from './Pariswap.module.css';
 
 interface CurrencyModalProps {
   swappableTokenList: TokenData[];
@@ -50,9 +51,9 @@ const CurrencyModal = ({
   };
 
   return (
-    <div className="currencyModal" onClick={handleClick}>
-      <div className="currencyContainers">
-        <div className="searchContainer">
+    <div className={styles.currencyModal} onClick={handleClick}>
+      <div className={styles.currencyContainers}>
+        <div className={styles.searchContainer}>
           <input
             type="text"
             placeholder="Search by token or paste address"
@@ -60,29 +61,29 @@ const CurrencyModal = ({
             onChange={handleFilterChange}
           />
           <button
-            className="closeInput"
+            className={styles.closeInput}
             onClick={() => setOpenCurrencyModal(false)}
           >
             X
           </button>
         </div>
       </div>
-      <div className="coinContainer">
+      <div className={styles.coinContainer}>
         {filteredCoins.map((coin, index) => (
           <div
-            className="coinContent"
+            className={styles.coinContent}
             key={index}
             onClick={() => handleCoinClick(coin)}
           >
-            <div className="imageContainer">
+            <div className={styles.imageContainer}>
               <img src={coin.logoURI} alt="" />
             </div>
-            <div className="rightCoin">
-              <div className="topContent">
-                <p className="symbol">{coin.symbol}</p>
+            <div className={styles.rightCoin}>
+              <div className={styles.topContent}>
+                <p className={styles.symbol}>{coin.symbol}</p>
                 <p>{truncateAddress(coin.address)}</p>
               </div>
-              <p className="coinName">{truncateName(coin.name)}</p>
+              <p className={styles.coinName}>{truncateName(coin.name)}</p>
             </div>
           </div>
         ))}

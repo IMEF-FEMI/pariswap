@@ -6,3 +6,4 @@ dist
 commands.sh
 .env
 *.tgz
+scripts

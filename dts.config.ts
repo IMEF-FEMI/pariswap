@@ -1,5 +1,6 @@
 import external from 'rollup-plugin-peer-deps-external';
-import css from "rollup-plugin-import-css";
+import postcss from 'rollup-plugin-postcss'
+import autoprefixer from 'autoprefixer'
 
 // Not transpiled with TypeScript or Babel, so use plain Es6/Node.js!
 /**
@@ -10,7 +11,11 @@ module.exports = {
     rollup(config, options) {
         config.plugins.push(
             external(),
-            css()
+            postcss({
+              modules: true,
+              minimize: true,
+              plugins: [autoprefixer()],
+            }),
         );
       return config; // always return a config.
     },

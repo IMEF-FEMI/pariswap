@@ -21,7 +21,6 @@ import {
   useNetworkConfiguration,
 } from './NetworkConfigurationProvider';
 import dynamic from 'next/dynamic';
-import { JupiterApiProvider } from './JupiterApiContext';
 
 import { PariswapProvider } from 'pariswap';
 
@@ -83,7 +82,7 @@ export const ContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
         <AutoConnectProvider>
           <WalletContextProvider>
             <PariswapProvider>
-              <JupiterApiProvider>{children}</JupiterApiProvider>
+              {children}
             </PariswapProvider>
           </WalletContextProvider>
         </AutoConnectProvider>

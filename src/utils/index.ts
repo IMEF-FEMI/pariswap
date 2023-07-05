@@ -1,44 +1,27 @@
-import splToken from '@solana/spl-token';
+import { Connection, PublicKey, TransactionInstruction } from '@solana/web3.js';
 
+import { ParimutuelWeb3, MAINNET_CONFIG } from '@hxronetwork/parimutuelsdk';
 import {
-  AddressLookupTableAccount,
-  Connection,
-  PublicKey,
-  Keypair,
-  TransactionMessage,
-  VersionedTransaction,
-  TransactionInstruction,
-  Transaction,
-} from '@solana/web3.js';
-
-import {
-  WalletSigner,
-  ParimutuelWeb3,
-  MAINNET_CONFIG,
-  PositionSideEnum,
-} from '@hxronetwork/parimutuelsdk';
+  getAssociatedTokenAddressSync,
+  getAccount,
+  createAssociatedTokenAccountInstruction,
+  TOKEN_PROGRAM_ID,
+} from 'spl-token';
+import { Route, TokenData } from '../types';
 
 export const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-const feeWallet = '5qxvvD5fJJK2xPBmifNV1cmbN6vMrncjTinmFWU1eRGs';
-const SWAP_FEE_BPS = 50;
+export const SWAP_FEE_BPS = 50;
+export const SWAP_FEE_WALLET = '5qxvvD5fJJK2xPBmifNV1cmbN6vMrncjTinmFWU1eRGs';
 
-export interface TokenData {
-  address: string;
-  chainId: number;
-  decimals: number;
-  extensions: { coingeckoId: string };
-  logoURI: string;
-  name: string;
-  symbol: string;
-  tags: string[];
-}
-
+/**
+ * Fetches a list of tokens swappable with USDC. (returns only validated tokens -- No unknown and banned tokens).
+ *
+ * @returns {Promise<TokenData[]>} - A promise that resolves to an array of TokenData objects representing the swappable tokens.
+ */
 export async function fetchSwappableTokenList(): Promise<TokenData[]> {
   // Fetch token list
   const response = await fetch('https://token.jup.ag/strict');
   const tokenList: TokenData[] = (await response.json()) as Array<any>;
-
-  console.log('tokenList 1: ', tokenList);
 
   // Retrieve indexed routed map
   const indexedRouteMapResponse = await fetch(
@@ -57,6 +40,15 @@ export async function fetchSwappableTokenList(): Promise<TokenData[]> {
     ].map((index: string | number) => getMint(index));
   });
 
+  // const tokens = getPossiblePairsTokenInfo({ tokens: tokenList, routeMap: generatedRouteMap, inputTokenAddress: USDC_MINT })
+
+  // console.log(tokens.l);
+
+  // return Object.values(tokens).filter((token) => {
+  //   if (token) return true
+  //   else return false
+  // });
+
   const swappableOutputForUSDC = generatedRouteMap[USDC_MINT];
   const getIndexInUSDCSwappableOutput = (mint: string) =>
     swappableOutputForUSDC.indexOf(mint);
@@ -68,7 +60,31 @@ export async function fetchSwappableTokenList(): Promise<TokenData[]> {
   return filteredTokenList;
 }
 
-async function getQuote(amount: number, inputMint: string) {
+// A helper function to help us find which output pair is possible
+const getPossiblePairsTokenInfo = ({
+  tokens,
+  routeMap,
+  inputTokenAddress,
+}: {
+  tokens: TokenData[];
+  routeMap: { [key: string]: string[] };
+  inputTokenAddress?: string;
+}) => {
+  try {
+    const possiblePairs = routeMap[inputTokenAddress];
+    var possiblePairsTokenInfo: { [key: string]: TokenData | undefined } = {};
+    possiblePairs.forEach((address) => {
+      possiblePairsTokenInfo[address] = tokens.find((t) => {
+        return t.address == address;
+      });
+    });
+
+    return possiblePairsTokenInfo;
+  } catch (error) {
+    throw error;
+  }
+};
+export async function getExactOutQuote(amount: number, inputMint: string) {
   const { data } = await (
     await fetch(
       `https://quote-api.jup.ag/v4/quote?inputMint=${inputMint}&outputMint=${USDC_MINT}&amount=${amount}&slippageBps=50&feeBps=${SWAP_FEE_BPS}&swapMode=ExactOut`
@@ -77,13 +93,55 @@ async function getQuote(amount: number, inputMint: string) {
   return data;
 }
 
-async function getSwapTransaction(routes: {}[], wallet: string) {
-  const usdcATA = await splToken.Token.getAssociatedTokenAddress(
-    splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
-    splToken.TOKEN_PROGRAM_ID,
-    new PublicKey(USDC_MINT),
-    new PublicKey(feeWallet)
-  );
+export async function getExactInQuote(amount: number, inputMint: string) {
+  const { data } = await (
+    await fetch(
+      `https://quote-api.jup.ag/v4/quote?inputMint=${inputMint}&outputMint=${USDC_MINT}&amount=${amount}&slippageBps=50&feeBps=${SWAP_FEE_BPS}&swapMode=ExactIn`
+    )
+  ).json();
+  return data;
+}
+
+export async function getTokenPrice(inputMint: string) {
+  const { data } = await (
+    await fetch(
+      `https://price.jup.ag/v4/price?ids=${inputMint}&vsToken=${USDC_MINT}`
+    )
+  ).json();
+
+  if (!data[inputMint]) {
+    return 0;
+  }
+  return Number(data[inputMint].price);
+}
+
+export async function getTokenValueInUSD(token: string, amount: number) {
+  const { data } = await (
+    await fetch(`https://price.jup.ag/v4/price?ids=${token}`)
+  ).json();
+
+  if (!data || Object.keys(data).length === 0) return 0;
+
+  return amount * Number(data[token].price);
+}
+
+export async function getSwapTransaction(
+  routes: Route[],
+  wallet: string,
+  swapType: string
+) {
+  let feeAccountATA: PublicKey;
+  if (swapType === 'ExactIn') {
+    feeAccountATA = await getAssociatedTokenAddressSync(
+      new PublicKey(USDC_MINT),
+      new PublicKey(SWAP_FEE_WALLET)
+    );
+  } else {
+    feeAccountATA = await getAssociatedTokenAddressSync(
+      new PublicKey(routes[0].marketInfos[0].inputMint),
+      new PublicKey(SWAP_FEE_WALLET)
+    );
+  }
 
   // get serialized transactions for the swap
   const transactions = await (
@@ -98,10 +156,10 @@ async function getSwapTransaction(routes: {}[], wallet: string) {
         // user public key to be used for the swap
         userPublicKey: wallet,
         // auto wrap and unwrap SOL. default is true
-        wrapUnwrapSOL: true,
+        wrapUnwrapSOL: swapType === 'ExactOut',
         // feeAccount is optional. Use if you want to charge a fee.  feeBps must have been passed in /quote API.
         // This is the ATA account for the output token where the fee will be sent to. If you are swapping from SOL->USDC then this would be the USDC ATA you want to collect the fee.
-        feeAccount: usdcATA,
+        feeAccount: feeAccountATA,
       }),
     })
   ).json();
@@ -111,98 +169,51 @@ async function getSwapTransaction(routes: {}[], wallet: string) {
   return swapTransaction;
 }
 
-interface PlacePositionTransactionData {
-  transaction: VersionedTransaction;
-  paymentBreakdown: {
-    swapFee: number;
-    devFee: number;
-    betAmount: number;
-    total: number;
-  };
+export async function getParimutuelMarketTimeLeft(
+  connection: Connection,
+  parimutuelMarket: PublicKey
+) {
+  const parimutuelWeb3 = new ParimutuelWeb3(MAINNET_CONFIG, connection);
+  const pariMarket = await parimutuelWeb3.getParimutuel(parimutuelMarket);
+  const timeWindowStart = pariMarket.info.parimutuel.timeWindowStart.toNumber();
+  const currentTime = new Date().getTime();
+  return timeWindowStart - currentTime;
 }
 
-export async function getPlacePositionTransactionData(
+export async function getPlatformFeeAccounts(
   connection: Connection,
-  wallet: WalletSigner | Keypair,
-  inputTokenMint: string,
-  amount: number,
-  parimutuelMarket: string,
-  side: PositionSideEnum,
-  feeUSDCAccount?: string,
-  devFeeBps = 0
-): Promise<PlacePositionTransactionData> {
-  amount = amount * 1e6;
-
-  const parimutuelWeb3 = new ParimutuelWeb3(MAINNET_CONFIG, connection);
-
-  //get quote routes
-  const routes = await getQuote(amount, inputTokenMint);
-  const swapFee = amount * (SWAP_FEE_BPS / 10_000);
-  const devFee = amount * (devFeeBps / 10_000);
-  const betAmount = amount - swapFee - devFee;
-
-  //get swap instruction
-  const swapTransaction = await getSwapTransaction(
-    routes,
-    wallet.publicKey.toBase58()
-  );
-  const swapTransactionBuf = Buffer.from(swapTransaction, 'base64');
-  var transaction = VersionedTransaction.deserialize(swapTransactionBuf);
-
-  // get address lookup table accounts
-  const addressLookupTableAccounts = await Promise.all(
-    transaction.message.addressTableLookups.map(async (lookup) => {
-      return new AddressLookupTableAccount({
-        key: lookup.accountKey,
-        state: AddressLookupTableAccount.deserialize(
-          await connection.getAccountInfo(lookup.accountKey).then((res) => {
-            return res.data;
-          })
-        ),
-      });
-    })
+  feeAccountOwner: PublicKey
+) {
+  const _userTokens = await connection.getParsedTokenAccountsByOwner(
+    feeAccountOwner,
+    { programId: TOKEN_PROGRAM_ID }
   );
 
-  // decompile transaction message and add transfer instruction
-  var message = TransactionMessage.decompile(transaction.message, {
-    addressLookupTableAccounts: addressLookupTableAccounts,
+  const accounts = _userTokens.value.map((account) => {
+    const publicKey = account.pubkey;
+    const accountInfo = account.account.data.parsed.info;
+    const mint = accountInfo.mint;
+    const balance = accountInfo.tokenAmount.amount;
+
+    return { publicKey, mint, balance };
   });
 
-  if (feeUSDCAccount && devFeeBps > 0) {
-    const userUsdcATA = await splToken.Token.getAssociatedTokenAddress(
-      splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
-      splToken.TOKEN_PROGRAM_ID,
-      new PublicKey(USDC_MINT),
-      new PublicKey(wallet.publicKey)
-    );
-    const transferInstruction = splToken.Token.createTransferInstruction(
-      splToken.TOKEN_PROGRAM_ID,
-      userUsdcATA,
-      new PublicKey(feeUSDCAccount),
-      wallet.publicKey,
-      [],
-      devFee
-    );
-    //transfer fee to dev wallet instruction
-    message.instructions.push(transferInstruction);
-  }
-  let placePositionIx = await parimutuelWeb3.getPlacePositionInstruction(
-    wallet as WalletSigner,
-    new PublicKey(parimutuelMarket),
-    betAmount,
-    side,
-    Date.now()
-  );
-  message.instructions.push(...placePositionIx);
-  transaction.message = message.compileToV0Message(addressLookupTableAccounts);
+  const feeAccounts = accounts.filter((account) => account.mint === USDC_MINT);
+  return feeAccounts;
+}
 
-  return {
-    transaction,
-    paymentBreakdown: {
-      swapFee,
-      devFee,
-      betAmount,
-      total: amount,
-    },
-  };
+export async function getCreateAccountInstruction(
+  connection: Connection,
+  payer: PublicKey,
+  mint: PublicKey,
+  owner: PublicKey,
+  ATA: PublicKey
+): Promise<TransactionInstruction | undefined> {
+  try {
+    // return null if account exists
+    await getAccount(connection, ATA);
+    return undefined;
+  } catch (error: unknown) {
+    return createAssociatedTokenAccountInstruction(payer, ATA, owner, mint);
+  }
 }

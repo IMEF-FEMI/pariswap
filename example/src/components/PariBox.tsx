@@ -10,7 +10,6 @@ import { useEffect } from 'react';
 import { PariConfig } from './Config';
 import PlacePositionBox from './PlacePositionBox';
 import { useNetworkConfiguration } from '@/contexts/NetworkConfigurationProvider';
-import { useJupiterApi } from '@/contexts/JupiterApiContext';
 
 interface PariObj {
   longPool: any; // This is how much money is in the Long Pool of the contest

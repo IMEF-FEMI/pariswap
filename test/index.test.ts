@@ -1,7 +1,11 @@
 import {
+  USDC_MINT,
   fetchSwappableTokenList,
-  getPlacePositionTransactionData,
+  getParimutuelMarketTimeLeft,
+  getPlacePositionTransaction,
+  getTokenValueInUSD,
 } from '../dist';
+
 import {
   ParimutuelWeb3,
   MarketPairEnum,
@@ -9,42 +13,34 @@ import {
   PositionSideEnum,
   MAINNET_CONFIG,
 } from '@hxronetwork/parimutuelsdk';
-import {
-  Connection,
-  Keypair,
-  PublicKey,
-  sendAndConfirmRawTransaction,
-  sendAndConfirmTransaction,
-} from '@solana/web3.js';
-import * as splToken from '@solana/spl-token';
-import { BlockheightBasedTransactionConfirmationStrategy } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey } from '@solana/web3.js';
+import { getAssociatedTokenAddressSync } from 'spl-token';
 
 require('dotenv').config();
 
 describe('Pariswap functions', () => {
   it('fetches list of tokens that can be swapped with USDC', async () => {
     const tokenList = await fetchSwappableTokenList();
+    console.log({ tokenList });
+
     expect(tokenList.length).toBeGreaterThan(0);
   });
 
+  it('gets token value in USDC', async () => {
+    const usdValue = await getTokenValueInUSD('SOL', 0.234);
+    expect(usdValue).toBeGreaterThan(0);
+  });
   it.only('generates LONG/SHORT instruction', async () => {
     const user = Keypair.generate();
     const dev = Keypair.generate();
-    const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
     const devFeeBps = 50; //0.50 percent
     const betAmount = 1;
 
-    const devUsdcATA = await splToken.Token.getAssociatedTokenAddress(
-      splToken.ASSOCIATED_TOKEN_PROGRAM_ID,
-      splToken.TOKEN_PROGRAM_ID,
-      new PublicKey(USDC_MINT),
-      new PublicKey(dev.publicKey)
-    );
     const config = MAINNET_CONFIG;
     const desiredSeconds = 60; //1 minute
-    let rpc = process.env.RPC_URL || '';
     const market = MarketPairEnum.BTCUSD;
     const side = PositionSideEnum.LONG;
+    let rpc = process.env.RPC_URL || '';
 
     const connection = new Connection(rpc, 'confirmed');
     const parimutuelWeb3 = new ParimutuelWeb3(config, connection);
@@ -65,10 +61,15 @@ describe('Pariswap functions', () => {
 
     const pubkey = pari_markets[0].pubkey.toString();
 
-    const placeBetData = await getPlacePositionTransactionData(
+    //dev usdc Account (must've been initialized)
+    const devUsdcATA = await getAssociatedTokenAddressSync(
+      new PublicKey(USDC_MINT),
+      dev.publicKey
+    );
+    const placeBetTransaction = await getPlacePositionTransaction(
       connection,
       user,
-      splToken.NATIVE_MINT.toBase58(),
+      'GzpRsvnKXKz586kRLkjdppR4dUCFwHa2qaszKkPUQx6g',
       betAmount,
       pubkey,
       side,
@@ -76,18 +77,40 @@ describe('Pariswap functions', () => {
       devFeeBps
     );
 
-    const rawTransaction = placeBetData.transaction.serialize();
+    placeBetTransaction.sign([user]);
+    const txId = await connection.sendTransaction(placeBetTransaction);
+    console.log(`https://explorer.solana.com/tx/${txId}`);
+  });
 
-    // const signature = await connection.sendRawTransaction(rawTransaction)
+  it('gets time left for parimutuel market', async () => {
+    const config = MAINNET_CONFIG;
+    const desiredSeconds = 60; //1 minute
+    const market = MarketPairEnum.BTCUSD;
+    const side = PositionSideEnum.LONG;
+    let rpc = process.env.RPC_URL || '';
 
-    // const latestBlockHash = await connection.getLatestBlockhash()
-    // const confirmStrategy: BlockheightBasedTransactionConfirmationStrategy = {
-    //   blockhash: latestBlockHash.blockhash,
-    //   lastValidBlockHeight: latestBlockHash.lastValidBlockHeight,
-    //   signature: signature
-    // }
-    // const result = await connection.confirmTransaction(confirmStrategy)
+    const connection = new Connection(rpc, 'confirmed');
+    const parimutuelWeb3 = new ParimutuelWeb3(config, connection);
+    const markets = getMarketPubkeys(config, market);
 
-    // console.log(result)
+    const marketsByTime = markets.filter(
+      (market) => market.duration === desiredSeconds
+    );
+
+    const parimutuels = await parimutuelWeb3.getParimutuels(marketsByTime);
+
+    const pari_markets = parimutuels.filter(
+      (account) =>
+        account.info.parimutuel.timeWindowStart.toNumber() > Date.now() &&
+        account.info.parimutuel.timeWindowStart.toNumber() <
+          Date.now() + desiredSeconds * 1000
+    );
+
+    const pubkey = pari_markets[0].pubkey.toString();
+    const timeLeft = await getParimutuelMarketTimeLeft(
+      connection,
+      new PublicKey(pubkey)
+    );
+    expect(timeLeft).toBeTruthy();
   });
 });

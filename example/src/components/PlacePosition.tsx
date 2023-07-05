@@ -1,28 +1,21 @@
-import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { useWallet } from '@solana/wallet-adapter-react';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { notify } from '../utils/notifications';
-import {
-  ParimutuelWeb3,
-  PositionSideEnum,
-  WalletSigner,
-} from '@hxronetwork/parimutuelsdk';
-import { PariConfig } from './Config';
-import PaymentDialog from './PaymentDialog';
-import { getBalance } from '@/utils/helpers';
+import { PositionSideEnum } from '@hxronetwork/parimutuelsdk';
 import { useNetworkConfiguration } from '@/contexts/NetworkConfigurationProvider';
-import { usePariswapApi } from 'pariswap';
+import { USDC_MINT, usePariswapApi } from 'pariswap';
+import { getAssociatedTokenAddress } from 'spl-token';
 
 const PlacePosition: FC<{
   pariPubkey: string;
   side: PositionSideEnum;
   amount: string;
 }> = (props) => {
-  const { publicKey, signTransaction } = useWallet();
-  const [showModal, setShowModal] = useState(false);
+  const { publicKey } = useWallet();
   const { networkConfiguration } = useNetworkConfiguration();
   const wallet = useWallet();
-  const ddd = usePariswapApi();
+  const { placeBet } = usePariswapApi();
 
   let rpc = 'https://api.devnet.solana.com';
 
@@ -30,10 +23,9 @@ const PlacePosition: FC<{
     rpc = process.env.NEXT_PUBLIC_RPC_URL;
   }
 
-  const connection = new Connection(rpc, 'confirmed');
-
-  const { config } = PariConfig;
-  const parimutuelWeb3 = new ParimutuelWeb3(config, connection);
+  const connection = new Connection(rpc, {
+    commitment: 'confirmed',
+  });
 
   const { pariPubkey, side, amount } = props;
 
@@ -46,15 +38,6 @@ const PlacePosition: FC<{
 
   return (
     <div>
-      <PaymentDialog
-        amount={amount}
-        pariPubkey={pariPubkey}
-        setShowModal={setShowModal}
-        showModal={showModal}
-        side={side}
-        connection={connection}
-      />
-
       <button
         className={`group w-60 m-2 btn disabled:animate-none bg-gradient-to-r ${bgGradientClass} ...`}
         onClick={async () => {
@@ -63,26 +46,31 @@ const PlacePosition: FC<{
             console.error('Send Transaction: Wallet not connected!');
             return;
           }
-          const balanceOfUSDC = await getBalance(
+          const devAcct = "9Fpz8XkTmyqMMGUYgZZFxrPPwSryLJNJDp7nxf29Dm7g"
+          const devUSDCATA = await getAssociatedTokenAddress(
+            new PublicKey(USDC_MINT),
+            new PublicKey(devAcct)
+          )
+          placeBet(
             connection,
-            publicKey,
-            false,
-            new PublicKey('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v')
-          );
-
-          // if (balanceOfUSDC >= Number(amount)) {
-          //   await parimutuelWeb3.placePosition(
-          //     wallet as WalletSigner,
-          //     new PublicKey(pariPubkey),
-          //     parseFloat(amount) * (10 ** 6 / 1),
-          //     side,
-          //     Date.now()
-          //   );
-          // } else {
-          //   setShowModal(true);
-          // }
-
-          console.log(ddd);
+            wallet,
+            Number(amount),
+            pariPubkey,
+            side,
+            devUSDCATA.toBase58(),
+            50
+          ).then((txId) => {
+            if (txId) {
+              console.log(`https://explorer.solana.com/tx/${txId}`);
+              notify({
+                type: 'success',
+                message: `Placed ${
+                  side === PositionSideEnum.LONG ? 'LONG' : 'SHORT'
+                } Position`,
+                txid: txId,
+              });
+            }
+          });
         }}
         disabled={amount === '0'}
       >
