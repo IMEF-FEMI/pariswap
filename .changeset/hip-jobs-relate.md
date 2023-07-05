@@ -1,5 +1,0 @@
----
-'pariswap': patch
----
-
-doc \*\*image

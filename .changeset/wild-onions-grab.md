@@ -1,5 +1,0 @@
----
-'pariswap': patch
----
-
-updated documentation
