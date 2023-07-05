@@ -1,7 +1,10 @@
 ## Pariswap Documentation
 
 Welcome to the Pariswap documentation! This guide will provide you with all the information you need to integrate Pariswap, a dev tool built on top of the Hxro Parimutuel Protocol, into your application. Pariswap allows users to place bets or positions using any SPL token they hold.
+---
 
+![PlaceBet Popup](/images/sc.png)
+---
 ### Table of Contents
 1. Introduction
 2. Getting Started
@@ -29,7 +32,13 @@ Pariswap is built on the Solana blockchain and can be accessed using the `@hxron
 To get started with Pariswap, you need to install the required dependencies:
 
 ```bash
-npm install @hxronetwork/parimutuelsdk
+npm install @hxronetwork/parimutuelsdk or yarn add @hxronetwork/parimutuelsdk
+```
+
+then install pariswap 
+
+```
+npm install pariswap or yarn add pariswap 
 ```
 
 #### Usage Requirements
@@ -152,9 +161,7 @@ placeBet(
   }
 });
 ```
----
 
-![PlaceBet Popup](./images/sc.png)
 ### 5. Additional Resources
 
 #### Support
