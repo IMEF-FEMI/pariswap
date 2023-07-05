@@ -1,6 +1,6 @@
 {
   "name": "pariswap",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "license": "MIT",
   "author": "bolajifemi28@gmail.com",
   "repository": "https://github.com/IMEF-FEMI/Pariswap",
@@ -9,8 +9,7 @@
   "module": "dist/pariswap.esm.js",
   "typings": "dist/index.d.ts",
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "scripts": {
     "analyze": "size-limit --why",

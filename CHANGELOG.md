@@ -1,5 +1,11 @@
 # pariswap
 
+## 1.0.3
+
+### Patch Changes
+
+- remove unnecesary stuff
+
 ## 1.0.2
 
 ### Patch Changes
