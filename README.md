@@ -3,7 +3,7 @@
 Welcome to the Pariswap documentation! This guide will provide you with all the information you need to integrate Pariswap, a dev tool built on top of the Hxro Parimutuel Protocol, into your application. Pariswap allows users to place bets or positions using any SPL token they hold.
 ---
 
-![PlaceBet Popup](/images/sc.png)
+![PlaceBet Popup](/images/placebet_screenshot.png)
 ---
 ### Table of Contents
 1. Introduction
