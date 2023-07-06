@@ -22,9 +22,9 @@ Welcome to the Pariswap documentation! This guide will provide you with all the 
 ---
 
 ### 1. Introduction
-Pariswap is a development tool that extends the functionality of the Hxro Parimutuel Protocol. It enables developers to build applications that allow users to participate in peer-to-peer, floating strike options with a pool-based, parimutuel payoff. This means that users can deposit funds into pools representing different outcomes and receive a pro-rata distribution of the total funds in the winning pool.
+Pariswap is a development tool that enhances the capabilities of the Hxro Parimutuel Protocol. With Pariswap, developers can create applications that enable users to engage in peer-to-peer, floating strike options. These options have a pool-based, parimutuel payoff, allowing users to deposit funds into pools representing various outcomes. When a winning outcome is determined, users receive a pro-rata distribution of the total funds in the winning pool.
 
-Pariswap is built on the Solana blockchain and can be accessed using the `@hxronetwork/parimutuelsdk` library. It provides a set of functions and a React hook component to simplify the integration process.
+Built on the Solana blockchain, Pariswap offers seamless integration through the @hxronetwork/parimutuelsdk library. This library provides a range of functions and a React hook component, simplifying the integration process for developers.
 
 ### 2. Getting Started
 
