@@ -87,8 +87,12 @@ p {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0,0,0,0.1);
+  background-color: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.5);
+
 }
+
+
 
 
 .poweredContainer{
@@ -244,6 +248,11 @@ p {
     transform: translateY(0);
   }
 }
+
+
+
+
+
 
 
 .loader {
@@ -519,7 +528,7 @@ p {
 }
 
 
-.proceedBtn{
+.proceedBtn, .insufficientFundsBtn{
   background: #19232D;
   color: white;
   display: flex;
@@ -540,4 +549,10 @@ p {
 
 .proceedBtn:hover{
   border: 1px solid green;
+}
+
+
+.insufficientFundsBtn {
+  opacity: 0.2; /* Reduce opacity to indicate disabled state */
+  cursor: not-allowed; 
 }
