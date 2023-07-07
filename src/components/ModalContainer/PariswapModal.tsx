@@ -175,7 +175,11 @@ const PariswapModal = ({
         </div>
 
         <button
-          className={styles.proceedBtn}
+          className={
+            timeUp || selectedCoin.usdValue < betAmount
+              ? styles.insufficientFundsBtn
+              : styles.proceedBtn
+          }
           onClick={handleLoader}
           disabled={timeUp || selectedCoin.usdValue < betAmount}
         >

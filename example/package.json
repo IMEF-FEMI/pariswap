@@ -30,7 +30,7 @@
     "fs": "^0.0.1-security",
     "immer": "^9.0.12",
     "next": "13.4.6",
-    "pariswap": "file:../pariswap-0.3.117.tgz",
+    "pariswap": "file:../pariswap-1.0.32.tgz",
     "postcss": "8.4.24",
     "react": "18.2.0",
     "react-dom": "18.2.0",

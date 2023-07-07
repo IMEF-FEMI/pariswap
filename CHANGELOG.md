@@ -1,5 +1,11 @@
 # pariswap
 
+## 1.0.33
+
+### Patch Changes
+
+- update modal bg
+
 ## 1.0.3
 
 ### Patch Changes
