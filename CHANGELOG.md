@@ -1,5 +1,11 @@
 # pariswap
 
+## 1.0.34
+
+### Patch Changes
+
+- update doc
+
 ## 1.0.33
 
 ### Patch Changes

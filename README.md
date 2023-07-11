@@ -1,10 +1,12 @@
+
 ## Pariswap Documentation
 
-Welcome to the Pariswap documentation! This guide will provide you with all the information you need to integrate Pariswap, a dev tool built on top of the Hxro Parimutuel Protocol, into your application. Pariswap allows users to place bets or positions using any SPL token they hold.
----
+Welcome to the Pariswap documentation! This guide will provide you with all the information you need to integrate Pariswap, a dev tool built on top of the Hxro Parimutuel Protocol, into your application. Pariswap allows users to place bets or positions using any SPL token they hold, while developers can take fees in a single transaction. Pariswap also takes advantage of versioned transactions in Solana, ensuring efficiency and scalability in transaction processing.
 
+---
 ![PlaceBet Popup](/placebet_screenshot.png)
 ---
+
 ### Table of Contents
 1. Introduction
 2. Getting Started
@@ -14,8 +16,12 @@ Welcome to the Pariswap documentation! This guide will provide you with all the 
    - `getPlacePositionTransaction`
    - `fetchSwappableTokenList`
 4. React Hook Component
+   - `usePariswapApi`
    - `PariswapProvider`
-5. Additional Resources
+5. Usage Examples
+   - Placing a Position
+   - Using the React Hook Component
+6. Additional Resources
    - Support
    - Examples
 
@@ -35,9 +41,9 @@ To get started with Pariswap, you need to install the required dependencies:
 npm install @hxronetwork/parimutuelsdk or yarn add @hxronetwork/parimutuelsdk
 ```
 
-then install pariswap 
+Then, install Pariswap:
 
-```
+```bash
 npm install pariswap or yarn add pariswap 
 ```
 
@@ -51,7 +57,7 @@ Before using Pariswap, ensure you have the following prerequisites:
 This section provides an overview of the available functions in the Pariswap API.
 
 #### `getPlacePositionTransaction`
-This function retrieves a versioned transaction for placing a position in a parimutuel market.
+The `getPlacePositionTransaction` function retrieves a versioned transaction for placing a position in a parimutuel market. It can be used independently without the React hook component.
 
 ```typescript
 async function getPlacePositionTransaction(
@@ -78,7 +84,7 @@ async function getPlacePositionTransaction(
 Returns a promise that resolves to the versioned transaction.
 
 #### `fetchSwappableTokenList`
-This function fetches a list of tokens swappable with USDC. It returns only validated tokens, excluding unknown and banned tokens.
+The `fetchSwappableTokenList` function is a helper function that fetches a list of tokens swappable with USDC. It returns only validated tokens, excluding unknown and banned tokens.
 
 ```typescript
 async function fetchSwappableTokenList(): Promise<TokenData[]>
@@ -87,9 +93,19 @@ async function fetchSwappableTokenList(): Promise<TokenData[]>
 Returns a promise that resolves to an array of `TokenData` objects representing the swappable tokens.
 
 ### 4. React Hook Component
-Pariswap provides a
+Pariswap provides a React hook component and a provider component to simplify the integration process.
 
- React hook component, `PariswapProvider`, that simplifies the integration process by handling the necessary context and state management.
+#### `usePariswapApi`
+The `usePariswapApi` hook provides a convenient way to access the Pariswap API functions within a React component.
+
+```typescript
+import { usePariswapApi } from 'pariswap';
+
+function YourComponent() {
+  const { placeBet, fetchSwappableTokenList } = usePariswapApi();
+  // Your component code...
+}
+```
 
 #### `PariswapProvider`
 The `PariswapProvider` component wraps your main React component and provides the necessary context for using Pariswap.
@@ -110,69 +126,142 @@ export default App;
 
 Ensure that the `PariswapProvider` component is placed at the root level of your application.
 
-#### Usage Example
-To use the Pariswap React hook component, follow these steps:
+### 5. Usage Examples
 
-1. Import the required dependencies:
-```typescript
-import { USDC_MINT, usePariswapApi } from 'pariswap';
-import { getAssociatedTokenAddress } from '@solana/spl-token';
-import { useWallet } from '@solana/wallet-adapter-react';
-```
+#### Placing a Position
+The following example demonstrates how to use the `getPlacePositionTransaction` function to place a position in a parimutuel market.
 
-2. Initialize the necessary variables and contexts:
 ```typescript
-const wallet = useWallet();
-const rpc = process.env.NEXT_PUBLIC_RPC_URL;
-const connection = new Connection(rpc, {
-  commitment: 'confirmed',
-});
-const devAcct = 'your_dev_wallet';
-```
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+} from '@solana/web3.js';
 
-3. Obtain the dev USDC associated token address:
-```typescript
-const devUSDCATA = await getAssociatedTokenAddress(
-  new PublicKey(USDC_MINT),
-  new PublicKey(devAcct)
+import {
+  ParimutuelWeb3,
+  MarketPairEnum,
+  PositionSideEnum,
+  getMarketPubkeys,
+  MAINNET_CONFIG,
+} from '@hxronetwork/parimutuelsdk';
+
+import
+
+ { getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+const user = Keypair.generate();
+const dev = Keypair.generate();
+const devFeeBps = 50; // 0.50 percent
+const betAmount = 1;
+
+const config = MAINNET_CONFIG;
+const desiredSeconds = 60; // 1 minute
+const market = MarketPairEnum.BTCUSD;
+const side = PositionSideEnum.LONG;
+let rpc = process.env.RPC_URL || '';
+
+const connection = new Connection(rpc, 'confirmed');
+const parimutuelWeb3 = new ParimutuelWeb3(config, connection);
+const markets = getMarketPubkeys(config, market);
+
+const marketsByTime = markets.filter(
+  (market) => market.duration === desiredSeconds
 );
-```
 
-4. Place a bet using the `placeBet` function from the `usePariswapApi` hook:
-```typescript
-placeBet(
+const parimutuels = await parimutuelWeb3.getParimutuels(marketsByTime);
+
+const pari_markets = parimutuels.filter(
+  (account) =>
+    account.info.parimutuel.timeWindowStart.toNumber() > Date.now() &&
+    account.info.parimutuel.timeWindowStart.toNumber() <
+      Date.now() + desiredSeconds * 1000
+);
+
+const pubkey = pari_markets[0].pubkey.toString();
+
+// Dev USDC Account (must've been initialized)
+const devUsdcATA = await getAssociatedTokenAddressSync(
+  new PublicKey(USDC_MINT),
+  dev.publicKey
+);
+
+const placeBetTransaction = await getPlacePositionTransaction(
   connection,
-  wallet,
-  Number(amount),
-  parimutuelMarket,
-  PositionSideEnum.LONG,
-  devUSDCATA.toBase58(),
-  50 // 0.5% developer fee
-).then((txId) => {
-  if (txId) {
-    console.log(`https://explorer.solana.com/tx/${txId}`);
-    notify({
-      type: 'success',
-      message: `Placed ${
-        side === PositionSideEnum.LONG ? 'LONG' : 'SHORT'
-      } Position`,
-      txid: txId,
-    });
-  }
-});
+  user,
+  "So11111111111111111111111111111111111111112",
+  betAmount,
+  pubkey,
+  side,
+  devUsdcATA.toBase58(),
+  devFeeBps
+);
+
+placeBetTransaction.sign([user]);
+const txId = await connection.sendTransaction(placeBetTransaction);
+console.log(`https://explorer.solana.com/tx/${txId}`);
 ```
 
-### 5. Additional Resources
+#### Using the React Hook Component
+The following example demonstrates how to use the `placeBet` function from the `usePariswapApi` hook to place a bet using the React hook component approach.
+
+```typescript
+import { usePariswapApi } from 'pariswap';
+import { useWallet } from '@solana/wallet-adapter-react';
+
+function YourComponent() {
+  const { placeBet } = usePariswapApi();
+  const wallet = useWallet();
+  const amount = 1;
+  const parimutuelMarket = 'parimutuel-market-address';
+
+  const handlePlaceBet = async () => {
+    // Dev USDC Account (must've been initialized)
+    const devUsdcATA = await getAssociatedTokenAddressSync(
+      new PublicKey(USDC_MINT),
+      dev.publicKey
+    );
+
+    placeBet(
+      connection,
+      wallet,
+      amount,
+      parimutuelMarket,
+      PositionSideEnum.LONG,
+      devUsdcATA.toBase58(),
+      50 // 0.5% developer fee
+    ).then((txId) => {
+      if (txId) {
+        console.log(`https://explorer.solana.com/tx/${txId}`);
+        notify({
+          type: 'success',
+          message: `Placed ${
+            side === PositionSideEnum.LONG ? 'LONG' : 'SHORT'
+          } Position`,
+          txid: txId,
+        });
+      }
+    });
+  };
+
+  // Your component code...
+
+  return (
+    <div>
+      <button onClick={handlePlaceBet}>Place Bet</button>
+    </div>
+  );
+}
+```
+
+### 6. Additional Resources
 
 #### Support
-If you have any questions or need assistance with Pariswap, feel free to reach out to me on [Twitter](https://www.twitter.com/femi_0x)
+If you have any questions or need assistance with Pariswap, feel free to reach out to me on [Twitter](https://www.twitter.com/femi_0x).
 
 #### Examples
 To explore more examples and usage scenarios, please refer to the [Pariswap Examples repository](https://github.com/IMEF-FEMI/pariswap/tree/main/example).
 
-#### Note: Swap Fee
-Please note that Pariswap charges a 0.5% swap fee on all swap transactions. This fee is automatically deducted from the transaction amount.
-
-
+---
 
 That's it! You should now have a good understanding of how to integrate Pariswap into your application. Happy coding!
